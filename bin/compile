@@ -27,11 +27,13 @@ cat <<EOF > $HOME/.rvmrc
 export rvm_prefix="$HOME"
 export rvm_path="$HOME/.rvm"
 EOF
+cp -fa $HOME/.rvmrc /root/.rvmrc
+cp -fa $HOME/.rvmrc /etc/rvmrc
 
 # If there is no cached RVM, install it and make a cached copy
 [ -d $CACHED_RVM_ROOT ] || (
   curl -sSL https://get.rvm.io | bash -s stable
-  ls -lsR $RVM_HOME
+  ls -lsR $RVM_HOME /usr/local/rvm /root/.rvm
   source $RVM_HOME/scripts/rvm
   export PATH="$PATH:$RVM_HOME/bin"
   hash -r

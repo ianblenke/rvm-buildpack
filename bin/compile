@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 BUILD_DIR=$1 # The app directory, usually /app. This will have the app source initially. Whatever is left here will be persisted.
 CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds so we can use it to speed the builds up
@@ -97,11 +97,12 @@ BUILD_PROFILE_ROOT=$BUILD_DIR/.profile.d
 # Generate the bash profile to source
 mkdir -p $BUILD_PROFILE_ROOT
 RVM_PROFILE=$BUILD_PROFILE_ROOT/rvm
-echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> $RVM_PROFILE
+echo 'set -x' >> $RVM_PROFILE
+echo 'export APP_DIR=$( cd $( dirname "${BASH_SOURCE[0]} ) && pwd )/..' >> $RVM_PROFILE
 echo 'export RVM_HOME="$APP_DIR/.rbenv"' >> $RVM_PROFILE
 echo 'export PATH="$RVM_HOME/bin:$PATH"' >> $RVM_PROFILE
 echo 'hash -r' >> $RVM_PROFILE
-echo 'source $RVM_ROOT/scripts/rvm' >> $RVM_PROFILE
+echo 'source $RVM_HOME/scripts/rvm' >> $RVM_PROFILE
 echo 'export PATH="$PATH:$APP_DIR/.rvm/bin"' >> $RVM_PROFILE
 echo 'rvm reload' >> $RVM_PROFILE
 

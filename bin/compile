@@ -79,7 +79,7 @@ EOF
     [ -d $RVM_HOME/rubies/${ruby_version} ] || (
       echo "Could not find rvm ruby ${ruby_version}, building"
 
-      rvm install ${ruby_version}
+      rvm install ${ruby_version} || rvm reinstall ${ruby_version}
     )
   done
 

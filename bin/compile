@@ -98,7 +98,7 @@ BUILD_PROFILE_ROOT=$BUILD_DIR/.profile.d
 mkdir -p $BUILD_PROFILE_ROOT
 RVM_PROFILE=$BUILD_PROFILE_ROOT/rvm
 echo 'set -x' >> $RVM_PROFILE
-echo 'export APP_DIR=$( cd $( dirname "${BASH_SOURCE[0]} ) && pwd )/..' >> $RVM_PROFILE
+echo 'export APP_DIR=$( cd $( dirname ${BASH_SOURCE[0]} ) && pwd )/..' >> $RVM_PROFILE
 echo 'export RVM_HOME="$APP_DIR/.rvm"' >> $RVM_PROFILE
 echo 'export PATH="$RVM_HOME/bin:$PATH"' >> $RVM_PROFILE
 echo 'hash -r' >> $RVM_PROFILE
@@ -120,9 +120,6 @@ echo 'rvm reload' >> $RVM_PROFILE
 EOF
 )
 cp -f $BUILD_DIR/.gemrc $APP_DIR/.gemrc
-
-echo GEMRC:
-cat $APP_DIR/.gemrc
 
 # Test out the new ruby, updating rubygems and installing bundler along the way
 bash -c "

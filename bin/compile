@@ -140,20 +140,11 @@ bash -c "
   gem install bundler --no-ri --no-rdoc
 "
 
-echo "Creating cached copy of bundled vendor gems"
-mkdir -p $CACHE_DIR/bundle
-cp -fa $APP_DIR/vendor/bundle $CACHE_DIR/bundle
-
 # Overlay the built rvm back overtop the $BUILD_DIR so it is persisted in the resultant slug
 mkdir -p $BUILD_DIR
 echo "Copying files to the slug build directory"
 cp -fa $RVM_HOME/ $BUILD_RVM_HOME/
 mkdir -p $BUILD_PROFILE_ROOT
 cp -fa $PROFILE_ROOT/* $BUILD_PROFILE_ROOT/
-
-if [ -d $CACHE_DIR/bundle ]; then
-  mkdir -p $BUILD_DIR/vendor/bundle
-  [ -n "${RVM_SKIP_BUNDLE}" ] || cp -fa $CACHE_DIR/bundle/ $BUILD_DIR/vendor/bundle/
-fi
 
 exit 0

@@ -33,7 +33,7 @@ cp -fa $HOME/.rvmrc /root/.rvmrc
 cp -fa $HOME/.rvmrc /etc/rvmrc
 
 # If there is no cached RVM, install it and make a cached copy
-#[ -d $CACHED_RVM_ROOT ] || (
+[ -d $CACHED_RVM_ROOT ] || (
 (
   curl -sSL https://get.rvm.io | bash -s stable
   find / -name 'rvm' -print
@@ -66,7 +66,7 @@ cp -fa $HOME/.rvmrc /etc/rvmrc
     mkdir -p $APT_CACHE_PATH
     echo "Dir::Cache::Archives \"$APT_CACHE_PATH\";" > /etc/apt/apt.conf.d/rvm
     apt-get -o dir::cache::archives=$APT_CACHE_PATH update
-    #LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev libreadline-dev libncurses-dev -f -y libssl-dev patch libyaml-dev
+    LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev libreadline-dev libncurses-dev -f -y libssl-dev patch libyaml-dev
   )
 
   rvm requirements
@@ -124,7 +124,7 @@ cp -f $RVM_PROFILE $BUILD_PROFILE_DIR/
 :benchmark: ${RVM_GEMRC_jBENCHMARK:-false}
 :bulk_threshold: ${RVM_GEMRC_THRESHOLD:-1000}
 :sources:
-- ${RVM_GEMRC_SOURCE1:-http://rubygems.org}
+- ${RVM_GEMRC_SOURCE:-https://rubygems.org}
 :update_sources: ${RVM_GEMRC_UPDATE_SOURCES:-true}
 :verbose: ${RVM_GEMRC_VERBOSE:-true}
 :gem: ${RVM_GEMRC_GEM:---no-ri --no-rdoc}
@@ -140,22 +140,12 @@ bash -c "
   source $RVM_HOME/scripts/rvm
   rvm reload
   cd $APP_DIR
-  echo 'OpenSSL check'
-  ruby -r openssl -e0
   gem install bundler --no-ri --no-rdoc
-  bundle install --without test --path vendor/bundle --binstubs vendor/bundle/bin -j4 --deployment
 "
 
 echo "Creating cached copy of bundled vendor gems"
 mkdir -p $CACHE_DIR/bundle
 cp -fa $APP_DIR/vendor/bundle $CACHE_DIR/bundle
-
-# Make a backup copy in the cache for this ruby version for next time
-#mkdir -p $CACHED_RVM_ROOT/rubies
-#echo "Creating cached copy of ruby $ruby_version"
-#cp -fa $RVM_ROOT/rubies/$ruby_version $CACHED_RVM_ROOT/rubies/$ruby_version
-
-# Copy the installed rvm into the build tree
 
 # Overlay the built rvm back overtop the $BUILD_DIR so it is persisted in the resultant slug
 mkdir -p $BUILD_DIR

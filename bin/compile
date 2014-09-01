@@ -34,8 +34,8 @@ cp -fa $HOME/.rvmrc /etc/rvmrc
 [ -d $CACHED_RVM_ROOT ] || (
   curl -sSL https://get.rvm.io | bash -s stable
   find / -name 'rvm' -print
-  source $RVM_HOME/scripts/rvm
-  export PATH="$PATH:$RVM_HOME/bin"
+  source $RVM_HOME/rvm/scripts/rvm
+  #export PATH="$PATH:$RVM_HOME/bin"
   hash -r
   cd $APP_DIR
   rvm reload

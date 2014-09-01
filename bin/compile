@@ -31,8 +31,9 @@ EOF
 # If there is no cached RVM, install it and make a cached copy
 [ -d $CACHED_RVM_ROOT ] || (
   curl -sSL https://get.rvm.io | bash -s stable
+  ls -lsR $RVM_HOME
   source $RVM_HOME/scripts/rvm
-  export PATH="$PATH:$APP_DIR/.rvm/bin"
+  export PATH="$PATH:$RVM_HOME/bin"
   hash -r
   cd $APP_DIR
   rvm reload
@@ -98,12 +99,15 @@ BUILD_PROFILE_ROOT=$BUILD_DIR/.profile.d
 # Generate the bash profile to source
 mkdir -p $PROFILE_ROOT
 RVM_PROFILE=$PROFILE_ROOT/rvm
+echo 'set -x' >> $RVM_PROFILE
 echo 'export APP_DIR=$( cd $( dirname ${BASH_SOURCE[0]} ) && pwd )/..' >> $RVM_PROFILE
 echo 'export RVM_HOME="$APP_DIR/.rvm"' >> $RVM_PROFILE
 echo 'export PATH="$RVM_HOME/bin:$PATH"' >> $RVM_PROFILE
-echo 'hash -r' >> $RVM_PROFILE
 echo 'source $RVM_HOME/scripts/rvm' >> $RVM_PROFILE
 echo 'export PATH="$PATH:$APP_DIR/.rvm/bin"' >> $RVM_PROFILE
+echo 'source $RVM_HOME/scripts/rvm' >> $RVM_PROFILE
+echo 'hash -r' >> $RVM_PROFILE
+echo 'set +x' >> $RVM_PROFILE
 echo 'rvm reload' >> $RVM_PROFILE
 cp -f $RVM_PROFILE $BUILD_PROFILE_DIR/
 

@@ -15,7 +15,7 @@ mkdir -p $APP_DIR
 
 [ -f "$APP_DIR/Gemfile" ] || cp -fa $BUILD_DIR $APP_DIR
 
-RVM_HOME=$APP_DIR/.rvm/rvm
+RVM_HOME=$APP_DIR/.rvm
 BUILD_RVM_HOME=$BUILD_DIR/.rvm
 
 REMOVE_RVM_CACHE=true

@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+
+set -ex
+
+BUILD_DIR=$1 # The app directory, usually /app. This will have the app source initially. Whatever is left here will be persisted.
+CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds so we can use it to speed the builds up
+ENV_DIR=$3     # An envdir directory of the app's environment variables
+
+CACHED_RVM_ROOT=$CACHE_DIR/rvm
+
+APP_DIR=/app
+HOME=/app
+export APP_DIR HOME
+mkdir -p $APP_DIR
+
+[ -f "$APP_DIR/Gemfile" ] || cp -fa $BUILD_DIR $APP_DIR
+
+RVM_HOME=$APP_DIR/.rvm
+BUILD_RVM_HOME=$BUILD_DIR/.rvm
+
+# If REMOVE_RVM_CACHE is set, clean up the cache
+[ -n "$REMOVE_RVM_CACHE" ] && [ -d $CACHED_RVM_ROOT ] && echo "Removing cached copy of RVM"
+[ -n "$REMOVE_RVM_CACHE" ] && [ -d $CACHED_RVM_ROOT ] && rm -fr $CACHED_RVM_ROOT
+
+# If there is no cached RVM, install it and make a cached copy
+[ -d $CACHED_RVM_ROOT ] || (
+  curl -sSL https://get.rvm.io | bash -s -- --ignore-dotfiles
+  source $RVM_HOME/scripts/rvm
+  export PATH="$PATH:$APP_DIR/.rvm/bin"
+  hash -r
+  cd $APP_DIR
+  rvm reload
+  rvm autolibs ${RVM_AUTOLIBS:-enable}
+
+  #if [ -f "/usr/lib/libreadline.so" ]; then
+  #  RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/libreadline.so"
+  #fi
+  #if [ -f "/usr/lib/x86_64-linux-gnu/libreadline.so" ]; then
+  #  RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/x86_64-linux-gnu/libreadline.so"
+  #fi
+  #CONFIGURE_OPTS="--disable-install-doc --with-readline=/usr/include/readline --with-openssl-dir=/usr/include/readline"
+  #export RUBY_CONFIGURE_OPTS CONFIGURE_OPTS
+  ##  curl -fsSL https://gist.github.com/mislav/a18b9d7f0dc5b9efc162.txt
+
+  # Prepare the build environment by updating ubuntu first. Use caching between builds to improve the speed.
+  grep old-releases /etc/apt/sources.list || (
+    if ! grep -qe 'utopic\|trusty\|saucy\|precise\|lucid' /etc/apt/sources.list ; then
+      perl -pi -e "s%archive.ubuntu.com/ubuntu%old-releases.ubuntu.com/ubuntu%g" /etc/apt/sources.list
+    fi
+    if ! grep -qe '^deb-src' /etc/apt/sources.list ; then
+      sed -e 's/^deb /deb-src /g' < /etc/apt/sources.list >> /etc/apt/sources.list
+    fi
+    APT_CACHE_PATH=$CACHE_DIR/apt
+    mkdir -p $APT_CACHE_PATH
+    echo "Dir::Cache::Archives \"$APT_CACHE_PATH\";" > /etc/apt/apt.conf.d/rvm
+    apt-get -o dir::cache::archives=$APT_CACHE_PATH update
+    #LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev libreadline-dev libncurses-dev -f -y libssl-dev patch libyaml-dev
+  )
+
+  rvm requirements
+
+  # Identify the ruby versions this app may need to run
+  ruby_version_from_dotfile=$( ( [ -f $APP_DIR/.ruby-version ] && cat $APP_DIR/.ruby-version ) || true )
+  ruby_version_from_gemfile=$( grep -e '^ruby ' $APP_DIR/Gemfile | sed -e 's/^ruby //' -e 's/[\'"'"'\"]//g' || true)
+
+  # Iterate through each ruby version, building it if neccessary
+  for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; do
+
+    echo "Checking for existence of rvm ruby ${ruby_version}"
+
+    # Generate the ruby version if it doesn't exist yet in the cache
+    [ -d $RVM_HOME/rubies/${ruby_version} ] || (
+      echo "Could not find rvm ruby ${ruby_version}, building"
+
+      rvm install ${ruby_version}
+    )
+  done
+
+  rvm reload
+  rvm rubygems current
+
+  cp -fa $RVM_HOME $CACHED_RVM_ROOT
+)
+
+# Copy the cached copy into ~/.rvm
+mkdir -p $RVM_HOME
+cp -fa $CACHED_RVM_ROOT $RVM_HOME
+
+BUILD_PROFILE_ROOT=$BUILD_DIR/.profile.d
+
+# Generate the bash profile to source
+mkdir -p $BUILD_PROFILE_ROOT
+RVM_PROFILE=$BUILD_PROFILE_ROOT/rvm
+echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> $RVM_PROFILE
+echo 'export RVM_HOME="$APP_DIR/.rbenv"' >> $RVM_PROFILE
+echo 'export PATH="$RVM_HOME/bin:$PATH"' >> $RVM_PROFILE
+echo 'hash -r' >> $RVM_PROFILE
+echo 'source $RVM_ROOT/scripts/rvm' >> $RVM_PROFILE
+echo 'export PATH="$PATH:$APP_DIR/.rvm/bin"' >> $RVM_PROFILE
+echo 'rvm reload' >> $RVM_PROFILE
+
+[ -f $BUILD_DIR/.gemrc ] || (
+  cat <<EOF > $BUILD_DIR/.gemrc
+---
+:backtrace: ${RVM_GEMRC_BACKTRACE:-true}
+:benchmark: ${RVM_GEMRC_jBENCHMARK:-false}
+:bulk_threshold: ${RVM_GEMRC_THRESHOLD:-1000}
+:sources:
+- ${RVM_GEMRC_SOURCE1:-http://rubygems.org}
+:update_sources: ${RVM_GEMRC_UPDATE_SOURCES:-true}
+:verbose: ${RVM_GEMRC_VERBOSE:-true}
+:gem: ${RVM_GEMRC_GEM:---no-ri --no-rdoc}
+EOF
+)
+cp -f $BUILD_DIR/.gemrc $APP_DIR/.gemrc
+
+echo GEMRC:
+cat $APP_DIR/.gemrc
+
+# Test out the new ruby, updating rubygems and installing bundler along the way
+bash -c "
+  echo 'Upgrading system rubygems from: '`gem --version`
+  REALLY_GEM_UPDATE_SYSTEM=true gem update --system --no-ri --no-rdoc
+  echo 'Upgraded system rubygems to: '`gem --version`
+  source $RVM_PROFILE
+  rbenv rehash
+  cd $APP_DIR
+  echo 'OpenSSL check'
+  ruby -r openssl -e0
+  bundle install --without test --path vendor/bundle --binstubs vendor/bundle/bin -j4 --deployment
+"
+
+echo "Creating cached copy of bundled vendor gems"
+mkdir -p $CACHE_DIR/bundle
+cp -fa $APP_DIR/vendor/bundle $CACHE_DIR/bundle
+
+# Make a backup copy in the cache for this ruby version for next time
+#mkdir -p $CACHED_RVM_ROOT/rubies
+#echo "Creating cached copy of ruby $ruby_version"
+#cp -fa $RVM_ROOT/rubies/$ruby_version $CACHED_RVM_ROOT/rubies/$ruby_version
+
+# Copy the installed rvm into the build tree
+
+# Overlay the built rvm back overtop the $BUILD_DIR so it is persisted in the resultant slug
+mkdir -p $BUILD_DIR
+echo "Copying files to the slug build directory"
+cp -fa $RVM_HOME/ $BUILD_RVM_HOME/
+mkdir -p $BUILD_PROFILE_ROOT
+cp -fa $PROFILE_ROOT/* $BUILD_PROFILE_ROOT/
+
+if [ -d $CACHE_DIR/bundle ]; then
+  mkdir -p $BUILD_DIR/vendor/bundle
+  [ -n "${RVM_SKIP_BUNDLE}" ] || cp -fa $CACHE_DIR/bundle/ $BUILD_DIR/vendor/bundle/
+fi
+
+exit 0

@@ -29,8 +29,7 @@ export rvm_path="$HOME/.rvm"
 EOF
 
 # If there is no cached RVM, install it and make a cached copy
-#[ -d $CACHED_RVM_ROOT ] || (
-(
+[ -d $CACHED_RVM_ROOT ] || (
   curl -sSL https://get.rvm.io | bash -s stable
   source $RVM_HOME/scripts/rvm
   export PATH="$PATH:$APP_DIR/.rvm/bin"
@@ -79,7 +78,7 @@ EOF
     [ -d $RVM_HOME/rubies/${ruby_version} ] || (
       echo "Could not find rvm ruby ${ruby_version}, building"
 
-      rvm install ${ruby_version} || rvm reinstall ${ruby_version}
+      rvm install ${ruby_version}
     )
   done
 

@@ -34,7 +34,6 @@ cp -fa $HOME/.rvmrc /etc/rvmrc
 
 # If there is no cached RVM, install it and make a cached copy
 [ -d $CACHED_RVM_ROOT ] || (
-(
   curl -sSL https://get.rvm.io | bash -s stable
   find / -name 'rvm' -print
   source $RVM_HOME/scripts/rvm

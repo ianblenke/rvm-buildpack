@@ -15,7 +15,7 @@ mkdir -p $APP_DIR
 
 [ -f "$APP_DIR/Gemfile" ] || cp -fa $BUILD_DIR $APP_DIR
 
-RVM_HOME=$APP_DIR/.rvm
+RVM_HOME=$APP_DIR/.rvm/rvm
 BUILD_RVM_HOME=$BUILD_DIR/.rvm
 
 # If REMOVE_RVM_CACHE is set, clean up the cache
@@ -34,7 +34,7 @@ cp -fa $HOME/.rvmrc /etc/rvmrc
 [ -d $CACHED_RVM_ROOT ] || (
   curl -sSL https://get.rvm.io | bash -s stable
   find / -name 'rvm' -print
-  source $RVM_HOME/rvm/scripts/rvm
+  source $RVM_HOME/scripts/rvm
   #export PATH="$PATH:$RVM_HOME/bin"
   hash -r
   cd $APP_DIR
@@ -103,12 +103,12 @@ mkdir -p $PROFILE_ROOT
 RVM_PROFILE=$PROFILE_ROOT/rvm
 echo 'set -x' >> $RVM_PROFILE
 echo 'export APP_DIR=$( cd $( dirname ${BASH_SOURCE[0]} ) && pwd )/..' >> $RVM_PROFILE
-echo 'export RVM_HOME="$APP_DIR/.rvm"' >> $RVM_PROFILE
+echo 'export RVM_HOME="$APP_DIR/.rvm/rvm"' >> $RVM_PROFILE
 echo 'export PATH="$RVM_HOME/bin:$PATH"' >> $RVM_PROFILE
 echo 'export PATH="$PATH:$APP_DIR/.rvm/bin"' >> $RVM_PROFILE
 echo 'export PATH="$PATH:$APP_DIR/.rvm/rvm/bin"' >> $RVM_PROFILE
 echo 'find / -name 'rvm' -print' >> $RVM_PROFILE
-echo 'source $RVM_HOME/rvm/scripts/rvm' >> $RVM_PROFILE
+echo 'source $RVM_HOME/scripts/rvm' >> $RVM_PROFILE
 echo 'hash -r' >> $RVM_PROFILE
 echo 'set +x' >> $RVM_PROFILE
 echo 'rvm reload' >> $RVM_PROFILE
@@ -134,7 +134,7 @@ bash -c "
   echo 'Upgrading system rubygems from: '`gem --version`
   REALLY_GEM_UPDATE_SYSTEM=true gem update --system --no-ri --no-rdoc
   echo 'Upgraded system rubygems to: '`gem --version`
-  source $RVM_HOME/rvm/scripts/rvm
+  source $RVM_HOME/scripts/rvm
   rvm reload
   cd $APP_DIR
   echo 'OpenSSL check'

@@ -99,7 +99,7 @@ mkdir -p $BUILD_PROFILE_ROOT
 RVM_PROFILE=$BUILD_PROFILE_ROOT/rvm
 echo 'set -x' >> $RVM_PROFILE
 echo 'export APP_DIR=$( cd $( dirname "${BASH_SOURCE[0]} ) && pwd )/..' >> $RVM_PROFILE
-echo 'export RVM_HOME="$APP_DIR/.rbenv"' >> $RVM_PROFILE
+echo 'export RVM_HOME="$APP_DIR/.rvm"' >> $RVM_PROFILE
 echo 'export PATH="$RVM_HOME/bin:$PATH"' >> $RVM_PROFILE
 echo 'hash -r' >> $RVM_PROFILE
 echo 'source $RVM_HOME/scripts/rvm' >> $RVM_PROFILE
@@ -130,10 +130,11 @@ bash -c "
   REALLY_GEM_UPDATE_SYSTEM=true gem update --system --no-ri --no-rdoc
   echo 'Upgraded system rubygems to: '`gem --version`
   source $RVM_PROFILE
-  rbenv rehash
+  rvm reload
   cd $APP_DIR
   echo 'OpenSSL check'
   ruby -r openssl -e0
+  gem install bundler --no-ri --no-rdoc
   bundle install --without test --path vendor/bundle --binstubs vendor/bundle/bin -j4 --deployment
 "
 

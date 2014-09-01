@@ -24,7 +24,7 @@ BUILD_RVM_HOME=$BUILD_DIR/.rvm
 
 # If there is no cached RVM, install it and make a cached copy
 [ -d $CACHED_RVM_ROOT ] || (
-  curl -sSL https://get.rvm.io | bash -s -- --ignore-dotfiles
+  curl -sSL https://get.rvm.io | bash -s stable
   source $RVM_HOME/scripts/rvm
   export PATH="$PATH:$APP_DIR/.rvm/bin"
   hash -r

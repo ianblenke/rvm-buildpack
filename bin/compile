@@ -35,7 +35,6 @@ cp -fa $HOME/.rvmrc /etc/rvmrc
 # If there is no cached RVM, install it and make a cached copy
 [ -d $CACHED_RVM_ROOT ] || (
   curl -sSL https://get.rvm.io | bash -s stable
-  find / -name 'rvm' -print
   source $RVM_HOME/scripts/rvm
   #export PATH="$PATH:$RVM_HOME/bin"
   hash -r
@@ -109,7 +108,6 @@ echo 'export RVM_HOME="$APP_DIR/.rvm/rvm"' >> $RVM_PROFILE
 echo 'export PATH="$RVM_HOME/bin:$PATH"' >> $RVM_PROFILE
 echo 'export PATH="$PATH:$APP_DIR/.rvm/bin"' >> $RVM_PROFILE
 echo 'export PATH="$PATH:$APP_DIR/.rvm/rvm/bin"' >> $RVM_PROFILE
-echo 'find / -name 'rvm' -print' >> $RVM_PROFILE
 echo 'source $RVM_HOME/scripts/rvm' >> $RVM_PROFILE
 echo 'hash -r' >> $RVM_PROFILE
 echo 'set +x' >> $RVM_PROFILE

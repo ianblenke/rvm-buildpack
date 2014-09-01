@@ -22,6 +22,12 @@ BUILD_RVM_HOME=$BUILD_DIR/.rvm
 [ -n "$REMOVE_RVM_CACHE" ] && [ -d $CACHED_RVM_ROOT ] && echo "Removing cached copy of RVM"
 [ -n "$REMOVE_RVM_CACHE" ] && [ -d $CACHED_RVM_ROOT ] && rm -fr $CACHED_RVM_ROOT
 
+# Install rvm as ~/.rvm as root
+cat <<EOF > $HOME/.rvmrc
+export rvm_prefix="$HOME"
+export rvm_path="$HOME/.rvm"
+EOF
+
 # If there is no cached RVM, install it and make a cached copy
 [ -d $CACHED_RVM_ROOT ] || (
   curl -sSL https://get.rvm.io | bash -s stable

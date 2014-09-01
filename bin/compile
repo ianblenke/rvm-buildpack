@@ -18,6 +18,8 @@ mkdir -p $APP_DIR
 RVM_HOME=$APP_DIR/.rvm/rvm
 BUILD_RVM_HOME=$BUILD_DIR/.rvm
 
+REMOVE_RVM_CACHE=true
+
 # If REMOVE_RVM_CACHE is set, clean up the cache
 [ -n "$REMOVE_RVM_CACHE" ] && [ -d $CACHED_RVM_ROOT ] && echo "Removing cached copy of RVM"
 [ -n "$REMOVE_RVM_CACHE" ] && [ -d $CACHED_RVM_ROOT ] && rm -fr $CACHED_RVM_ROOT
@@ -31,7 +33,8 @@ cp -fa $HOME/.rvmrc /root/.rvmrc
 cp -fa $HOME/.rvmrc /etc/rvmrc
 
 # If there is no cached RVM, install it and make a cached copy
-[ -d $CACHED_RVM_ROOT ] || (
+#[ -d $CACHED_RVM_ROOT ] || (
+(
   curl -sSL https://get.rvm.io | bash -s stable
   find / -name 'rvm' -print
   source $RVM_HOME/scripts/rvm

@@ -134,7 +134,7 @@ bash -c "
   echo 'Upgrading system rubygems from: '`gem --version`
   REALLY_GEM_UPDATE_SYSTEM=true gem update --system --no-ri --no-rdoc
   echo 'Upgraded system rubygems to: '`gem --version`
-  source $RVM_PROFILE/rvm/script/rvm
+  source $RVM_PROFILE/rvm/scripts/rvm
   rvm reload
   cd $APP_DIR
   echo 'OpenSSL check'

@@ -105,10 +105,10 @@ echo 'set -x' >> $RVM_PROFILE
 echo 'export APP_DIR=$( cd $( dirname ${BASH_SOURCE[0]} ) && pwd )/..' >> $RVM_PROFILE
 echo 'export RVM_HOME="$APP_DIR/.rvm"' >> $RVM_PROFILE
 echo 'export PATH="$RVM_HOME/bin:$PATH"' >> $RVM_PROFILE
-echo 'source $RVM_HOME/scripts/rvm' >> $RVM_PROFILE
 echo 'export PATH="$PATH:$APP_DIR/.rvm/bin"' >> $RVM_PROFILE
+echo 'export PATH="$PATH:$APP_DIR/.rvm/rvm/bin"' >> $RVM_PROFILE
 echo 'find / -name 'rvm' -print' >> $RVM_PROFILE
-echo 'source $RVM_HOME/scripts/rvm' >> $RVM_PROFILE
+echo 'source $RVM_HOME/rvm/scripts/rvm' >> $RVM_PROFILE
 echo 'hash -r' >> $RVM_PROFILE
 echo 'set +x' >> $RVM_PROFILE
 echo 'rvm reload' >> $RVM_PROFILE
@@ -134,7 +134,7 @@ bash -c "
   echo 'Upgrading system rubygems from: '`gem --version`
   REALLY_GEM_UPDATE_SYSTEM=true gem update --system --no-ri --no-rdoc
   echo 'Upgraded system rubygems to: '`gem --version`
-  source $RVM_PROFILE
+  source $RVM_PROFILE/rvm/script/rvm
   rvm reload
   cd $APP_DIR
   echo 'OpenSSL check'

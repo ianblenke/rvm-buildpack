@@ -93,11 +93,12 @@ EOF
 mkdir -p $RVM_HOME
 cp -fa $CACHED_RVM_ROOT $RVM_HOME
 
+PROFILE_ROOT=$APP_DIR/.profile.d
 BUILD_PROFILE_ROOT=$BUILD_DIR/.profile.d
 
 # Generate the bash profile to source
-mkdir -p $BUILD_PROFILE_ROOT
-RVM_PROFILE=$BUILD_PROFILE_ROOT/rvm
+mkdir -p $PROFILE_ROOT
+RVM_PROFILE=$PROFILE_ROOT/rvm
 echo 'set -x' >> $RVM_PROFILE
 echo 'export APP_DIR=$( cd $( dirname ${BASH_SOURCE[0]} ) && pwd )/..' >> $RVM_PROFILE
 echo 'export RVM_HOME="$APP_DIR/.rvm"' >> $RVM_PROFILE
@@ -106,6 +107,7 @@ echo 'hash -r' >> $RVM_PROFILE
 echo 'source $RVM_HOME/scripts/rvm' >> $RVM_PROFILE
 echo 'export PATH="$PATH:$APP_DIR/.rvm/bin"' >> $RVM_PROFILE
 echo 'rvm reload' >> $RVM_PROFILE
+cp -f $RVM_PROFILE $BUILD_PROFILE_DIR/
 
 [ -f $BUILD_DIR/.gemrc ] || (
   cat <<EOF > $BUILD_DIR/.gemrc
